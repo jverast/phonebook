@@ -67,6 +67,17 @@ const BOUNDARY = 999999999999,
 app.post("/api/persons", (req, res) => {
   const body = req.body
 
+  if (!body.name || !body.number) {
+    res.status(400).json({ error: "name or number missing" })
+    return
+  }
+
+  const namesArray = persons.map((person) => person.name)
+  if (namesArray.includes(body.name)) {
+    res.status(400).json({ error: "name must be unique" })
+    return
+  }
+
   const person = {
     id: generateId(),
     name: body.name,
