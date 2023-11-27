@@ -26,6 +26,8 @@ let persons = [
   }
 ]
 
+app.use(express.json())
+
 app.get("/api/persons", (req, res) => {
   res.json(persons)
 })
@@ -57,6 +59,22 @@ app.delete("/api/persons/:id", (req, res) => {
 
   persons = persons.filter((person) => person.id !== id)
   res.status(204).end()
+})
+
+const BOUNDARY = 999999999999,
+  generateId = () => Math.round(Math.random() * BOUNDARY)
+
+app.post("/api/persons", (req, res) => {
+  const body = req.body
+
+  const person = {
+    id: generateId(),
+    name: body.name,
+    number: body.number
+  }
+
+  persons = persons.concat(person)
+  res.status(201).json(person)
 })
 
 app.listen(HTTP_PORT, () => {

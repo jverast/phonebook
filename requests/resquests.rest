@@ -8,3 +8,12 @@ GET http://localhost:3001/api/persons/3
 
 ###
 DELETE http://localhost:3001/api/persons/4
+
+###
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{
+  "name": "Jorge Linares",
+  "number": "015-555-5555"
+}
