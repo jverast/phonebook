@@ -29,6 +29,7 @@ let persons = [
 ]
 
 app.use(express.json())
+app.use(express.static("dist"))
 app.use(cors())
 
 morgan.token("content", (req, res) => {
