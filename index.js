@@ -1,4 +1,5 @@
 const express = require("express")
+const morgan = require("morgan")
 
 const app = express(),
   HTTP_PORT = 3001
@@ -27,6 +28,7 @@ let persons = [
 ]
 
 app.use(express.json())
+app.use(morgan("tiny"))
 
 app.get("/api/persons", (req, res) => {
   res.json(persons)
