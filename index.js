@@ -9,24 +9,6 @@ const Person = require("./models/person")
 const app = express(),
   HTTP_PORT = process.env.PORT || 3001
 
-const persons = [
-  {
-    id: 1,
-    name: "Anna",
-    number: "040-1234556"
-  },
-  {
-    id: 2,
-    name: "Arto Vihavainen",
-    number: "045-1232456"
-  },
-  {
-    id: 3,
-    name: "Ada Lovelace",
-    number: "040-1231236"
-  }
-]
-
 app.use(express.json())
 app.use(express.static("dist"))
 app.use(cors())
@@ -34,11 +16,11 @@ app.use(cors())
 morgan.token("content", (req, res) => {
   return Object.values(req.body).length && JSON.stringify(req.body)
 })
-app.use(
-  morgan(
-    ":method :url :status :res[content-length] - :response-time ms :content"
-  )
+const logger = morgan(
+  ":method :url :status :res[content-length] - :response-time ms :content"
 )
+
+app.use(logger)
 
 app.get("/api/persons", (req, res) => {
   Person.find({}).then((persons) => {
@@ -68,10 +50,9 @@ app.get("/api/persons/:id", (req, res) => {
 })
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id)
-
-  persons = persons.filter((person) => person.id !== id)
-  res.status(204).end()
+  Person.findByIdAndDelete(req.params.id).then((result) => {
+    res.status(204).end()
+  })
 })
 
 const BOUNDARY = 999999999999,
@@ -84,12 +65,6 @@ app.post("/api/persons", (req, res) => {
     res.status(400).json({ error: "name or number missing" })
     return
   }
-
-  /* const namesArray = persons.map((person) => person.name)
-  if (namesArray.includes(body.name)) {
-    res.status(400).json({ error: "name must be unique" })
-    return
-  } */
 
   const person = new Person({
     id: generateId(),
