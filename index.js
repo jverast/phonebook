@@ -33,10 +33,13 @@ app.get("/api/persons", (req, res, next) => {
 app.get("/info", (req, res, next) => {
   Person.find({})
     .countDocuments()
-    .then((total) => {
+    .then((result) => {
+      const total = result,
+        date = new Date()
+
       res.send(`
       <p>Phonebook has info for ${total} people</p>
-      <p>${new Date()}</p>
+      <p>${date}</p>
     `)
     })
     .catch((err) => next(err))
