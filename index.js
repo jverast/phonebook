@@ -22,13 +22,15 @@ const logger = morgan(
 
 app.use(logger)
 
-app.get("/api/persons", (req, res) => {
-  Person.find({}).then((persons) => {
-    res.json(persons)
-  })
+app.get("/api/persons", (req, res, next) => {
+  Person.find({})
+    .then((persons) => {
+      res.json(persons)
+    })
+    .catch((err) => next(err))
 })
 
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
   Person.find({})
     .countDocuments()
     .then((total) => {
@@ -37,45 +39,62 @@ app.get("/info", (req, res) => {
       <p>${new Date()}</p>
     `)
     })
+    .catch((err) => next(err))
 })
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       res.json(person)
     })
-    .catch((err) => {
-      res.status(404).json({ error: "not found" })
+    .catch((err) => next(err))
+})
+
+app.delete("/api/persons/:id", (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then((result) => {
+      res.status(204).end()
     })
+    .catch((err) => next(err))
 })
 
-app.delete("/api/persons/:id", (req, res) => {
-  Person.findByIdAndDelete(req.params.id).then((result) => {
-    res.status(204).end()
-  })
-})
-
-const BOUNDARY = 999999999999,
-  generateId = () => Math.round(Math.random() * BOUNDARY)
-
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body
 
   if (!body.name || !body.number) {
-    res.status(400).json({ error: "name or number missing" })
-    return
+    return res.status(400).json({ error: "name or number missing" })
   }
 
   const person = new Person({
-    id: generateId(),
     name: body.name,
     number: body.number
   })
 
-  person.save().then((person) => {
-    res.status(201).json(person)
-  })
+  person
+    .save()
+    .then((person) => {
+      res.status(201).json(person)
+    })
+    .catch((err) => next(err))
 })
+
+const unknownEndpoint = (req, res) => {
+  return res.status(404).json({ error: "unknown endpoint" })
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (err, req, res, next) => {
+  console.log(err.message)
+
+  if (err.name === "CastError") {
+    return res.status(400).json({ error: "malformatted id" })
+  }
+
+  next(err)
+}
+
+app.use(errorHandler)
 
 app.listen(HTTP_PORT, () => {
   console.log(`App is running on port ${HTTP_PORT}`)
