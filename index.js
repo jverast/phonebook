@@ -85,20 +85,21 @@ app.post("/api/persons", (req, res) => {
     return
   }
 
-  const namesArray = persons.map((person) => person.name)
+  /* const namesArray = persons.map((person) => person.name)
   if (namesArray.includes(body.name)) {
     res.status(400).json({ error: "name must be unique" })
     return
-  }
+  } */
 
-  const person = {
+  const person = new Person({
     id: generateId(),
     name: body.name,
     number: body.number
-  }
+  })
 
-  persons = persons.concat(person)
-  res.status(201).json(person)
+  person.save().then((person) => {
+    res.status(201).json(person)
+  })
 })
 
 app.listen(HTTP_PORT, () => {
