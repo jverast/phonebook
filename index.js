@@ -117,6 +117,4 @@ const errorHandler = (err, req, res, next) => {
 
 app.use(errorHandler)
 
-app.listen(HTTP_PORT, () => {
-  console.log(`App is running on port ${HTTP_PORT}`)
-})
+app.listen(HTTP_PORT, () => console.log(`App is running on port ${HTTP_PORT}`))
